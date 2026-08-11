@@ -1,24 +1,80 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Code Quality Evaluator</title>
-  <link rel="stylesheet" href="css/style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code Quality Evaluator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
 </head>
 <body>
-  <h1>Code Quality Evaluator</h1>
 
-  <select id="languageSelect">
-    <option value="javascript">JavaScript</option>
-    <option value="python">Python</option>
-    <option value="clike">C / C++ / Java</option>
-  </select>
+  <div class="app">
 
-  <textarea id="codeEditor"></textarea>
-  <button id="analyzeBtn">Analyze</button>
+    <!-- fake window titlebar -->
+    <div class="titlebar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="titlebar-name">code-quality-evaluator — main</div>
+      <div class="titlebar-status" id="connStatus">● checking backend…</div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
+    </div>
 
-  <div id="output"></div>
+    <header class="hero">
+      <div class="eyebrow">// static analysis, on demand</div>
+      <h1>Code Quality<br>Evaluator</h1>
+    </header>
+
+    <div class="workspace">
+
+      <!-- LEFT: editor pane -->
+      <div class="pane editor-pane">
+        <div class="tabstrip" id="langTabs">
+          <button class="tab active" data-mode="javascript" data-label="JavaScript">JavaScript</button>
+          <button class="tab" data-mode="python" data-label="Python">Python</button>
+          <button class="tab" data-mode="clike" data-label="Java / C / C++">Java / C / C++</button>
+        </div>
+        <textarea id="codeEditor"></textarea>
+        <div class="editor-footer">
+          <button id="analyzeBtn">
+            <span class="btn-icon">▶</span> Analyze
+          </button>
+          <span class="hint">Ctrl + Enter also works</span>
+        </div>
+      </div>
+
+      <!-- RIGHT: report pane -->
+      <div class="pane report-pane">
+        <div class="report-label">Quality Score</div>
+
+        <div class="ring-wrap">
+          <svg class="ring" width="140" height="140" viewBox="0 0 140 140">
+            <circle class="ring-track" cx="70" cy="70" r="60"></circle>
+            <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="60"></circle>
+          </svg>
+          <div class="ring-score" id="ringScore">—</div>
+        </div>
+
+        <div class="report-label">Issues</div>
+        <div id="issuesList" class="issues-list">
+          <div class="issue-empty">Run an analysis to see results here.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- fake status bar -->
+    <div class="statusbar">
+      <span id="statusLang">JavaScript</span>
+      <span class="statusbar-sep">•</span>
+      <span id="statusReady">Ready</span>
+      <span class="statusbar-spacer"></span>
+      <span>Code Quality Evaluator v0.1</span>
+    </div>
+
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
