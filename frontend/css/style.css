@@ -261,3 +261,174 @@ body.light {
 .theme-toggle:hover {
   background: var(--chrome);
 }
+
+/* --- mobile responsiveness --- */
+@media (max-width: 760px) {
+
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  body {
+    padding: 10px 8px 30px;
+    display: block;
+  }
+
+  .app {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  /* Title bar */
+  .titlebar {
+    width: 100%;
+    padding: 9px 10px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .titlebar-name {
+    min-width: 0;
+    font-size: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .titlebar-status {
+    font-size: 10px;
+  }
+
+  /* Hero */
+  .hero {
+    width: 100%;
+    padding: 22px 16px 18px;
+  }
+
+  .hero h1 {
+    font-size: 28px;
+    line-height: 1.1;
+  }
+
+  .eyebrow {
+    font-size: 11px;
+  }
+
+  /* Workspace */
+  .workspace {
+    width: 100%;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+  }
+
+  .pane {
+    min-width: 0;
+    width: 100%;
+    padding: 14px;
+  }
+
+  /* Language tabs */
+  .tabstrip {
+    width: 100%;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    padding: 8px 10px;
+    font-size: 11px;
+  }
+
+  /* Code editor */
+  .CodeMirror {
+    width: 100%;
+    max-width: 100%;
+    height: 220px;
+    font-size: 12px;
+  }
+
+  /* Analyze button + hint */
+  .editor-footer {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  button#analyzeBtn {
+    font-size: 12px;
+    padding: 9px 15px;
+  }
+
+  .hint {
+    font-size: 10px;
+  }
+
+  /* Report */
+  .report-label {
+    font-size: 10px;
+  }
+
+  .ring-wrap {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 12px;
+  }
+
+  .ring {
+    width: 120px;
+    height: 120px;
+    display: block;
+  }
+
+  .ring-score {
+    font-size: 24px;
+  }
+
+  .issues-list {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .issue-item {
+    width: 100%;
+    font-size: 11px;
+  }
+
+  /* Status bar */
+  .statusbar {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 10px;
+    font-size: 10px;
+  }
+
+  .statusbar-spacer {
+    display: none;
+  }
+}
+
+/* Tablet / Nest Hub */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .app {
+    max-width: 95%;
+  }
+
+  .hero {
+    padding: 30px 24px 24px;
+  }
+
+  .workspace {
+    grid-template-columns: 1.4fr 1fr;
+  }
+}
