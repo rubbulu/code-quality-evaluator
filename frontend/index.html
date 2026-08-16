@@ -9,6 +9,7 @@
 <link rel="stylesheet" href="css/style.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 </head>
 <body>
 
@@ -47,10 +48,9 @@
         </div>
       </div>
 
-      <!-- RIGHT: report pane -->
+    <!-- RIGHT: report pane -->
       <div class="pane report-pane">
         <div class="report-label">Quality Score</div>
-
         <div class="ring-wrap">
           <svg class="ring" width="140" height="140" viewBox="0 0 140 140">
             <circle class="ring-track" cx="70" cy="70" r="60"></circle>
@@ -58,13 +58,55 @@
           </svg>
           <div class="ring-score" id="ringScore">—</div>
         </div>
-
         <div class="report-label">Issues</div>
         <div id="issuesList" class="issues-list">
           <div class="issue-empty">Run an analysis to see results here.</div>
         </div>
       </div>
+    </div>
 
+    <!-- DASHBOARD SECTION (NEW) - OUTSIDE WORKSPACE -->
+    <div class="dashboard-section">
+      <div class="dashboard-title">📊 Analysis Dashboard</div>
+      
+      <div class="dashboard-grid">
+        <!-- Error Breakdown Chart -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Error Breakdown</h3>
+          <canvas id="errorBreakdownChart" height="200"></canvas>
+        </div>
+
+        <!-- Language Breakdown Chart -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Language Coverage</h3>
+          <canvas id="languageBreakdownChart" height="200"></canvas>
+        </div>
+
+        <!-- Complexity Indicator -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Code Metrics</h3>
+          <div id="complexityMetrics" class="metrics-container">
+            <div class="metric">
+              <span class="metric-label">Complexity</span>
+              <span class="metric-value" id="metricComplexity">—</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Duplicates</span>
+              <span class="metric-value" id="metricDuplicates">—</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Total Issues</span>
+              <span class="metric-value" id="metricIssues">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Score Trend -->
+        <div class="dashboard-card">
+          <h3 class="card-title">Score Distribution</h3>
+          <canvas id="scoreDistributionChart" height="200"></canvas>
+        </div>
+      </div>
     </div>
 
     <!-- fake status bar -->
