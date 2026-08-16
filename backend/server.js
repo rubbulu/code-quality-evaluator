@@ -5,6 +5,7 @@ const connectDB = require('./config/db');
 const authRoutes = require('./routes/auth');
 const analyzeHTML = require('./analyzers/htmlAnalyzer');
 const analyzeCSS = require('./analyzers/cssAnalyzer');
+const analyzeJS = require('./analyzers/jsAnalyzer');
 
 const app = express();
 app.use(cors());
@@ -47,6 +48,8 @@ app.post('/api/analyze', (req, res) => {
       result = analyzeHTML(code);
     } else if (language === "css") {
       result = analyzeCSS(code);
+    } else if (language === "javascript") {
+      result = analyzeJS(code);
     } else {
       result = { score: 85, errors: [], message: "Placeholder response (real analysis coming soon)" };
     }
