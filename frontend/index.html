@@ -35,6 +35,8 @@
           <button class="tab active" data-mode="javascript" data-label="JavaScript">JavaScript</button>
           <button class="tab" data-mode="python" data-label="Python">Python</button>
           <button class="tab" data-mode="clike" data-label="Java / C / C++">Java / C / C++</button>
+          <button class="tab" data-mode="htmlmixed" data-label="HTML">HTML</button>
+          <button class="tab" data-mode="css" data-label="CSS">CSS</button>
         </div>
         <textarea id="codeEditor"></textarea>
         <div class="editor-footer">
@@ -75,7 +77,10 @@
     </div>
 
   </div>
-
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/xml/xml.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/css/css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/htmlmixed/htmlmixed.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/python/python.min.js"></script>
