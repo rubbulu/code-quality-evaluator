@@ -463,7 +463,14 @@ body.light {
   background: var(--chrome);
   border: 1px solid var(--border);
   border-radius: 8px;
+  position: relative;
   padding: 16px;
+  height: 260px;
+}
+
+.dashboard-card canvas {
+  max-height: 100%;
+  color: var(--text);
 }
 
 .card-title {
@@ -533,4 +540,9 @@ body.light {
     font-size: 12px;
     margin-bottom: 12px;
   }
+}
+
+.CodeMirror {
+  max-height: 340px;
+  overflow-y: auto;
 }

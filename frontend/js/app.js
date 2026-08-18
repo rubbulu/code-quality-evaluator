@@ -96,6 +96,7 @@ async function runAnalysis() {
     const result = await response.json();
     updateRing(result.score ?? 0);
     renderIssues(result.errors);
+    renderDashboard(result);
     statusReady.innerText = "Ready";
   } catch (err) {
     statusReady.innerText = "Backend not reachable";
@@ -110,8 +111,10 @@ editor.setOption("extraKeys", {
 });
 
 
-
 /* ===== DASHBOARD CHARTS ===== */
+
+Chart.defaults.color = "#e8eaf0";
+Chart.defaults.borderColor = "rgba(255,255,255,0.08)";
 
 let errorBreakdownChartInstance = null;
 let languageBreakdownChartInstance = null;
@@ -125,8 +128,7 @@ function destroyChart(chartInstance) {
 
 function renderErrorBreakdownChart(errors) {
   const ctx = document.getElementById("errorBreakdownChart").getContext("2d");
-  
-  // Count errors by type
+
   const errorCounts = {};
   errors.forEach(e => {
     const type = e.type || "warning";
@@ -142,7 +144,7 @@ function renderErrorBreakdownChart(errors) {
       datasets: [{
         data: Object.values(errorCounts),
         backgroundColor: ["#f2637a", "#e8a33d", "#4fd1c5", "#6fcf97"],
-        borderColor: "var(--panel)",
+        borderColor: "#191c27",
         borderWidth: 2
       }]
     },
@@ -153,8 +155,8 @@ function renderErrorBreakdownChart(errors) {
         legend: {
           position: "bottom",
           labels: {
-            color: "var(--text)",
-            font: { family: "var(--mono)", size: 11 },
+            color: "#e8eaf0",
+            font: { size: 11 },
             padding: 12
           }
         }
@@ -165,11 +167,12 @@ function renderErrorBreakdownChart(errors) {
 
 function renderLanguageBreakdownChart(language) {
   const ctx = document.getElementById("languageBreakdownChart").getContext("2d");
-  
+
   destroyChart(languageBreakdownChartInstance);
 
-  const languages = ["JavaScript", "Python", "Java", "C", "C++"];
-  const selected = languages.includes(language) ? language : "Unknown";
+  const languages = ["JavaScript", "Python", "Java", "C", "C++", "HTML", "CSS"];
+  const languageMap = { javascript: "JavaScript", python: "Python", clike: "Java", htmlmixed: "HTML", css: "CSS" };
+  const selected = languageMap[language] || "Unknown";
 
   languageBreakdownChartInstance = new Chart(ctx, {
     type: "bar",
@@ -187,19 +190,17 @@ function renderLanguageBreakdownChart(language) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         x: {
           beginAtZero: true,
           max: 1,
-          ticks: { color: "var(--muted)" },
-          grid: { color: "var(--border)" }
+          ticks: { color: "#8b93a7" },
+          grid: { color: "#2c3040" }
         },
         y: {
-          ticks: { color: "var(--muted)" },
+          ticks: { color: "#8b93a7" },
           grid: { display: false }
         }
       }
@@ -209,7 +210,7 @@ function renderLanguageBreakdownChart(language) {
 
 function renderScoreDistributionChart(score) {
   const ctx = document.getElementById("scoreDistributionChart").getContext("2d");
-  
+
   destroyChart(scoreDistributionChartInstance);
 
   const ranges = ["0-20", "21-40", "41-60", "61-80", "81-100"];
@@ -236,9 +237,7 @@ function renderScoreDistributionChart(score) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
@@ -248,7 +247,7 @@ function renderScoreDistributionChart(score) {
           grid: { display: false }
         },
         x: {
-          ticks: { color: "var(--muted)" },
+          ticks: { color: "#8b93a7" },
           grid: { display: false }
         }
       }
