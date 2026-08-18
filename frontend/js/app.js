@@ -96,6 +96,7 @@ async function runAnalysis() {
     const result = await response.json();
     updateRing(result.score ?? 0);
     renderIssues(result.errors);
+    renderDashboard(result);
     statusReady.innerText = "Ready";
   } catch (err) {
     statusReady.innerText = "Backend not reachable";
@@ -108,3 +109,171 @@ document.getElementById("analyzeBtn").addEventListener("click", runAnalysis);
 editor.setOption("extraKeys", {
   "Ctrl-Enter": runAnalysis
 });
+
+
+/* ===== DASHBOARD CHARTS ===== */
+
+Chart.defaults.color = "#e8eaf0";
+Chart.defaults.borderColor = "rgba(255,255,255,0.08)";
+
+let errorBreakdownChartInstance = null;
+let languageBreakdownChartInstance = null;
+let scoreDistributionChartInstance = null;
+
+function destroyChart(chartInstance) {
+  if (chartInstance) {
+    chartInstance.destroy();
+  }
+}
+
+function renderErrorBreakdownChart(errors) {
+  const ctx = document.getElementById("errorBreakdownChart").getContext("2d");
+
+  const errorCounts = {};
+  errors.forEach(e => {
+    const type = e.type || "warning";
+    errorCounts[type] = (errorCounts[type] || 0) + 1;
+  });
+
+  destroyChart(errorBreakdownChartInstance);
+
+  errorBreakdownChartInstance = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: Object.keys(errorCounts).map(k => k.charAt(0).toUpperCase() + k.slice(1)),
+      datasets: [{
+        data: Object.values(errorCounts),
+        backgroundColor: ["#f2637a", "#e8a33d", "#4fd1c5", "#6fcf97"],
+        borderColor: "#191c27",
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: {
+            color: "#e8eaf0",
+            font: { size: 11 },
+            padding: 12
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderLanguageBreakdownChart(language) {
+  const ctx = document.getElementById("languageBreakdownChart").getContext("2d");
+
+  destroyChart(languageBreakdownChartInstance);
+
+  const languages = ["JavaScript", "Python", "Java", "C", "C++", "HTML", "CSS"];
+  const languageMap = { javascript: "JavaScript", python: "Python", clike: "Java", htmlmixed: "HTML", css: "CSS" };
+  const selected = languageMap[language] || "Unknown";
+
+  languageBreakdownChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: languages,
+      datasets: [{
+        label: "Analysis Count",
+        data: languages.map(l => l === selected ? 1 : 0),
+        backgroundColor: languages.map(l => l === selected ? "#4fd1c5" : "#2c3040"),
+        borderRadius: 4
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          max: 1,
+          ticks: { color: "#8b93a7" },
+          grid: { color: "#2c3040" }
+        },
+        y: {
+          ticks: { color: "#8b93a7" },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function renderScoreDistributionChart(score) {
+  const ctx = document.getElementById("scoreDistributionChart").getContext("2d");
+
+  destroyChart(scoreDistributionChartInstance);
+
+  const ranges = ["0-20", "21-40", "41-60", "61-80", "81-100"];
+  const distribution = [0, 0, 0, 0, 0];
+
+  if (score <= 20) distribution[0] = 1;
+  else if (score <= 40) distribution[1] = 1;
+  else if (score <= 60) distribution[2] = 1;
+  else if (score <= 80) distribution[3] = 1;
+  else distribution[4] = 1;
+
+  scoreDistributionChartInstance = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ranges,
+      datasets: [{
+        label: "Score Range",
+        data: distribution,
+        backgroundColor: "#4fd1c5",
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 1,
+          ticks: { display: false },
+          grid: { display: false }
+        },
+        x: {
+          ticks: { color: "#8b93a7" },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+}
+
+function updateComplexityMetrics(result) {
+  const complexityEl = document.getElementById("metricComplexity");
+  const duplicatesEl = document.getElementById("metricDuplicates");
+  const issuesEl = document.getElementById("metricIssues");
+
+  const complexity = result.complexity ? result.complexity.toString() : "—";
+  const duplicates = result.duplicates ? result.duplicates.length.toString() : "0";
+  const totalIssues = result.errors ? result.errors.length.toString() : "0";
+
+  complexityEl.innerText = complexity;
+  duplicatesEl.innerText = duplicates;
+  issuesEl.innerText = totalIssues;
+}
+
+function renderDashboard(result) {
+  if (result.errors && result.errors.length > 0) {
+    renderErrorBreakdownChart(result.errors);
+  }
+  renderLanguageBreakdownChart(currentLanguage());
+  renderScoreDistributionChart(result.score || 0);
+  updateComplexityMetrics(result);
+}
