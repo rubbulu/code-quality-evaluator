@@ -147,7 +147,7 @@ button#analyzeBtn:hover {
   box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.2);
 }
 button#analyzeBtn:active { transform: translateY(1px); }
-.btn-icon { font-size: 10px; }
+.btn-icon { font-size: 14px; }
 
 .hint { font-size: 11.5px; color: var(--muted); }
 
@@ -433,8 +433,6 @@ body.light {
   }
 }
 
-
-
 /* === DASHBOARD STYLES === */
 .dashboard-section {
   background: var(--panel);
@@ -545,4 +543,126 @@ body.light {
 .CodeMirror {
   max-height: 340px;
   overflow-y: auto;
+}
+
+/* === LOADING & ERROR STATES (NEW) === */
+
+.hidden {
+  display: none !important;
+}
+
+.dashboard-loading,
+.dashboard-error {
+  padding: 24px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.dashboard-loading {
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.dashboard-loading p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dashboard-error {
+  background: rgba(242, 99, 122, 0.1);
+  border: 1px solid var(--coral);
+}
+
+.dashboard-error p {
+  color: var(--coral);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Mobile loading/error states */
+@media (max-width: 760px) {
+  .dashboard-loading,
+  .dashboard-error {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+  }
+}
+
+/* === DOWNLOAD REPORT BUTTON === */
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--amber);
+  color: #0b1210;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 16px;
+  cursor: pointer;
+  margin-top: 16px;
+  width: 100%;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.2);
+  transform: translateY(-1px);
+}
+
+.download-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.download-btn:disabled:hover {
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+/* Mobile styling */
+@media (max-width: 760px) {
+  .download-btn {
+    font-size: 12px;
+    padding: 9px 12px;
+    margin-top: 12px;
+  }
 }

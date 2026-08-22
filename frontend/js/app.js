@@ -80,45 +80,14 @@ async function checkBackend() {
 }
 checkBackend();
 
-// analyze
-async function runAnalysis() {
-  const code = editor.getValue();
-  const language = currentLanguage();
-  const statusReady = document.getElementById("statusReady");
-  statusReady.innerText = "Analyzing…";
-
-  try {
-    const response = await fetch("http://localhost:5000/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, code })
-    });
-    const result = await response.json();
-    updateRing(result.score ?? 0);
-    renderIssues(result.errors);
-    renderDashboard(result);
-    statusReady.innerText = "Ready";
-  } catch (err) {
-    statusReady.innerText = "Backend not reachable";
-    document.getElementById("issuesList").innerHTML =
-      `<div class="issue-empty">Could not reach the backend. Is the server running?</div>`;
-  }
-}
-
-document.getElementById("analyzeBtn").addEventListener("click", runAnalysis);
-editor.setOption("extraKeys", {
-  "Ctrl-Enter": runAnalysis
-});
-
-
-/* ===== DASHBOARD CHARTS ===== */
-
+// ===== DASHBOARD CHARTS =====
 Chart.defaults.color = "#e8eaf0";
 Chart.defaults.borderColor = "rgba(255,255,255,0.08)";
 
 let errorBreakdownChartInstance = null;
 let languageBreakdownChartInstance = null;
 let scoreDistributionChartInstance = null;
+let lastAnalysisResult = null; // Store last analysis for PDF export
 
 function destroyChart(chartInstance) {
   if (chartInstance) {
@@ -277,3 +246,254 @@ function renderDashboard(result) {
   renderScoreDistributionChart(result.score || 0);
   updateComplexityMetrics(result);
 }
+
+// ===== LOADING & ERROR STATE HELPERS =====
+function showDashboardLoading(show) {
+  const loadingEl = document.getElementById("dashboardLoading");
+  if (loadingEl) {
+    if (show) {
+      loadingEl.classList.remove("hidden");
+    } else {
+      loadingEl.classList.add("hidden");
+    }
+  }
+}
+
+function showDashboardError(message) {
+  const errorEl = document.getElementById("dashboardError");
+  const errorMsg = document.getElementById("errorMessage");
+  if (errorEl && errorMsg) {
+    errorMsg.innerText = message;
+    errorEl.classList.remove("hidden");
+  }
+}
+
+function hideDashboardError() {
+  const errorEl = document.getElementById("dashboardError");
+  if (errorEl) {
+    errorEl.classList.add("hidden");
+  }
+}
+
+// ===== ANALYZE FUNCTION =====
+async function runAnalysis() {
+  const code = editor.getValue();
+  const language = currentLanguage();
+  const statusReady = document.getElementById("statusReady");
+  
+  // Validation: Check if code is empty
+  if (!code || code.trim().length === 0) {
+    showDashboardError("Please enter some code to analyze.");
+    statusReady.innerText = "Ready";
+    return;
+  }
+
+  // Show loading state
+  showDashboardLoading(true);
+  statusReady.innerText = "Analyzing…";
+  
+  try {
+    const response = await fetch("http://localhost:5000/api/analyze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ language, code })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Backend error: ${response.status}`);
+    }
+    
+    const result = await response.json();
+    
+    // Check if result is valid
+    if (!result || typeof result.score === 'undefined') {
+      throw new Error("Invalid response from backend");
+    }
+    
+    // SAVE RESULT FOR PDF EXPORT
+    lastAnalysisResult = {
+      score: result.score,
+      errors: result.errors || [],
+      language: language,
+      timestamp: new Date(),
+      complexity: result.complexity,
+      duplicates: result.duplicates || []
+    };
+    
+    // Hide loading state
+    showDashboardLoading(false);
+    hideDashboardError();
+    
+    // Enable download button
+    const downloadBtn = document.getElementById("downloadReportBtn");
+    if (downloadBtn) downloadBtn.disabled = false;
+    
+    // Update UI
+    updateRing(result.score ?? 0);
+    renderIssues(result.errors);
+    renderDashboard(result);
+    statusReady.innerText = "Ready";
+    
+  } catch (err) {
+    showDashboardLoading(false);
+    showDashboardError(`Analysis failed: ${err.message}`);
+    statusReady.innerText = "Error";
+    document.getElementById("issuesList").innerHTML =
+      `<div class="issue-empty">Error: ${err.message}</div>`;
+    const downloadBtn = document.getElementById("downloadReportBtn");
+    if (downloadBtn) downloadBtn.disabled = true;
+  }
+}
+
+document.getElementById("analyzeBtn").addEventListener("click", runAnalysis);
+editor.setOption("extraKeys", {
+  "Ctrl-Enter": runAnalysis
+});
+
+// ===== PDF REPORT GENERATION =====
+function generatePDFReport() {
+  if (!lastAnalysisResult) {
+    alert("No analysis data available. Please run an analysis first.");
+    return;
+  }
+
+  try {
+    // Initialize jsPDF
+    const { jsPDF } = window;
+    const doc = new jsPDF();
+    
+    // Set colors
+    const primaryColor = [79, 209, 197]; // Teal
+    const textColor = [30, 30, 30]; // Dark text
+    const lightGray = [150, 150, 150]; // Gray
+    
+    let yPosition = 20;
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const margin = 15;
+    const contentWidth = pageWidth - (2 * margin);
+    
+    // Header
+    doc.setFillColor(...primaryColor);
+    doc.rect(0, 0, pageWidth, 30, 'F');
+    doc.setTextColor(255, 255, 255);
+    doc.setFontSize(22);
+    doc.setFont(undefined, 'bold');
+    doc.text('Code Quality Report', margin, 20);
+    
+    yPosition = 45;
+    
+    // Timestamp
+    doc.setTextColor(...lightGray);
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'normal');
+    const timestamp = lastAnalysisResult.timestamp.toLocaleString();
+    doc.text(`Generated: ${timestamp}`, margin, yPosition);
+    yPosition += 8;
+    
+    // Separator line
+    doc.setDrawColor(...primaryColor);
+    doc.line(margin, yPosition, pageWidth - margin, yPosition);
+    yPosition += 12;
+    
+    // Score Section
+    doc.setTextColor(...textColor);
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Quality Score', margin, yPosition);
+    yPosition += 10;
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.setTextColor(...primaryColor);
+    doc.text(`${lastAnalysisResult.score} / 100`, margin, yPosition);
+    yPosition += 12;
+    
+    // Language
+    doc.setTextColor(...textColor);
+    doc.setFontSize(11);
+    doc.setFont(undefined, 'normal');
+    doc.text(`Language: ${lastAnalysisResult.language}`, margin, yPosition);
+    yPosition += 8;
+    
+    // Metrics
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('Code Metrics', margin, yPosition);
+    yPosition += 6;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    const complexity = lastAnalysisResult.complexity || 'N/A';
+    const duplicateCount = lastAnalysisResult.duplicates ? lastAnalysisResult.duplicates.length : 0;
+    const issueCount = lastAnalysisResult.errors ? lastAnalysisResult.errors.length : 0;
+    
+    doc.text(`• Complexity: ${complexity}`, margin + 5, yPosition);
+    yPosition += 6;
+    doc.text(`• Duplicates: ${duplicateCount}`, margin + 5, yPosition);
+    yPosition += 6;
+    doc.text(`• Total Issues: ${issueCount}`, margin + 5, yPosition);
+    yPosition += 12;
+    
+    // Issues Section
+    doc.setFont(undefined, 'bold');
+    doc.setFontSize(11);
+    doc.text('Issues Found', margin, yPosition);
+    yPosition += 8;
+    
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    
+    if (!lastAnalysisResult.errors || lastAnalysisResult.errors.length === 0) {
+      doc.text('No issues found. Great job!', margin + 5, yPosition);
+      yPosition += 10;
+    } else {
+      // Add issues with page break if needed
+      lastAnalysisResult.errors.forEach((error, index) => {
+        // Check if we need a new page
+        if (yPosition > 250) {
+          doc.addPage();
+          yPosition = 20;
+        }
+        
+        const errorType = error.type ? error.type.toUpperCase() : 'WARNING';
+        const errorLine = error.line ? `Line ${error.line}` : 'Unknown';
+        const errorMsg = error.message || 'No message';
+        
+        doc.text(`${index + 1}. [${errorType}] ${errorLine}`, margin + 5, yPosition);
+        yPosition += 5;
+        
+        // Wrap long messages
+        const wrappedMsg = doc.splitTextToSize(`   ${errorMsg}`, contentWidth - 10);
+        doc.text(wrappedMsg, margin + 5, yPosition);
+        yPosition += (wrappedMsg.length * 5) + 3;
+      });
+    }
+    
+    // Footer
+    yPosition += 10;
+    doc.setTextColor(...lightGray);
+    doc.setFontSize(9);
+    doc.text('Code Quality Evaluator - v0.1', margin, 280);
+    
+    // Save PDF
+    const filename = `code-quality-report-${Date.now()}.pdf`;
+    doc.save(filename);
+    
+  } catch (error) {
+    console.error('PDF generation error:', error);
+    alert(`Failed to generate PDF: ${error.message}`);
+  }
+}
+
+// Initialize download button
+document.addEventListener('DOMContentLoaded', function() {
+  const downloadBtn = document.getElementById("downloadReportBtn");
+  
+  if (downloadBtn) {
+    // Start disabled
+    downloadBtn.disabled = true;
+    
+    // Add click handler
+    downloadBtn.addEventListener('click', generatePDFReport);
+  }
+});
