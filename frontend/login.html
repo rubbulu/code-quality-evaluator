@@ -8,31 +8,32 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@600;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="auth-page">
 
   <div class="app">
 
     <!-- fake window titlebar -->
     <div class="titlebar">
       <div class="dots"><span></span><span></span><span></span></div>
-      <div class="titlebar-name">code-quality-evaluator — auth</div>
+      <div class="titlebar-name">code-quality-evaluator</div>
       <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
     </div>
 
-    <header class="hero">
-      <div class="eyebrow">// sign in to save your analysis history</div>
-      <h1 style="font-size: 32px;">Welcome Back</h1>
+    <header class="auth-hero">
+      <div class="eyebrow">// account access</div>
+      <h1 id="authTitle">Sign in</h1>
+      <p id="authSubtitle">Continue analysing code and keep your work in one place.</p>
     </header>
 
-    <div class="pane" style="max-width: 380px; margin: 0 auto;">
+    <main class="auth-card">
 
-      <div class="tabstrip" id="authTabs">
-        <button class="tab active" data-form="login">Log In</button>
-        <button class="tab" data-form="signup">Sign Up</button>
+      <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Account access">
+        <button class="tab active" type="button" role="tab" aria-selected="true" aria-controls="loginForm" data-form="login">Log in</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="signupForm" data-form="signup">Sign up</button>
       </div>
 
       <!-- LOGIN FORM -->
-      <form id="loginForm" class="auth-form">
+      <form id="loginForm" class="auth-form" aria-label="Log in">
         <label>Email</label>
         <input type="email" id="loginEmail" placeholder="you@example.com" required>
 
@@ -44,7 +45,7 @@
       </form>
 
       <!-- SIGNUP FORM -->
-      <form id="signupForm" class="auth-form hidden">
+      <form id="signupForm" class="auth-form hidden" aria-label="Sign up">
         <label>Name</label>
         <input type="text" id="signupName" placeholder="Your name" required>
 
@@ -58,15 +59,9 @@
         <div class="auth-message" id="signupMessage"></div>
       </form>
 
-    </div>
+    </main>
 
-    <div class="statusbar">
-      <span>Auth</span>
-      <span class="statusbar-sep">•</span>
-      <span id="statusReady">Ready</span>
-      <span class="statusbar-spacer"></span>
-      <span>Code Quality Evaluator v0.1</span>
-    </div>
+    <footer class="auth-footer">Code Quality Evaluator</footer>
 
   </div>
 

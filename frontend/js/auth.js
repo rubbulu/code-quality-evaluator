@@ -12,12 +12,29 @@ themeToggle.addEventListener("click", () => {
 
 // tab switching between login/signup
 const authTabs = document.querySelectorAll("#authTabs .tab");
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+
+function setAuthMode(mode) {
+  const isLogin = mode === "login";
+
+  authTabs.forEach(tab => {
+    const isActive = tab.dataset.form === mode;
+    tab.classList.toggle("active", isActive);
+    tab.setAttribute("aria-selected", String(isActive));
+  });
+
+  document.getElementById("loginForm").classList.toggle("hidden", !isLogin);
+  document.getElementById("signupForm").classList.toggle("hidden", isLogin);
+  authTitle.textContent = isLogin ? "Sign in" : "Create your account";
+  authSubtitle.textContent = isLogin
+    ? "Continue analysing code and keep your work in one place."
+    : "Create an account to save and revisit your analysis history.";
+}
+
 authTabs.forEach(tab => {
   tab.addEventListener("click", () => {
-    authTabs.forEach(t => t.classList.remove("active"));
-    tab.classList.add("active");
-    document.getElementById("loginForm").classList.toggle("hidden", tab.dataset.form !== "login");
-    document.getElementById("signupForm").classList.toggle("hidden", tab.dataset.form !== "signup");
+    setAuthMode(tab.dataset.form);
   });
 });
 
@@ -29,19 +46,24 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
   const msg = document.getElementById("loginMessage");
 
   try {
-    const res = await fetch("http://localhost:5000/api/login", {
+    const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password })
     });
     const data = await res.json();
     if (res.ok) {
-      msg.textContent = "Login successful!";
+      localStorage.setItem("cqe-token", data.token);
+      localStorage.setItem("cqe-user-name", data.name);
+
+      msg.textContent = "Login successful! Redirecting...";
       msg.className = "auth-message success";
-    } else {
-      msg.textContent = data.message || "Login failed";
-      msg.className = "auth-message error";
-    }
+
+      window.location.href = "index.html";
+  } else {
+    msg.textContent = data.message || "Login failed";
+    msg.className = "auth-message error";
+  }
   } catch {
     msg.textContent = "Backend not reachable";
     msg.className = "auth-message error";
@@ -57,7 +79,7 @@ document.getElementById("signupForm").addEventListener("submit", async (e) => {
   const msg = document.getElementById("signupMessage");
 
   try {
-    const res = await fetch("http://localhost:5000/api/register", {
+    const res = await fetch("http://localhost:5000/api/auth/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, password })
