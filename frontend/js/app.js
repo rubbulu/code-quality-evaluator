@@ -88,10 +88,15 @@ async function runAnalysis() {
   statusReady.innerText = "Analyzing…";
 
   try {
-    const response = await fetch("http://localhost:5000/api/analyze", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ language, code })
+   const token = localStorage.getItem("cqe-token");
+
+   const response = await fetch("http://localhost:5000/api/analyze", {
+     method: "POST",
+     headers: {
+       "Content-Type": "application/json",
+       ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+     body: JSON.stringify({ language, code })
     });
     const result = await response.json();
     updateRing(result.score ?? 0);
