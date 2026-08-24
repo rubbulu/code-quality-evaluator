@@ -147,7 +147,7 @@ button#analyzeBtn:hover {
   box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.2);
 }
 button#analyzeBtn:active { transform: translateY(1px); }
-.btn-icon { font-size: 10px; }
+.btn-icon { font-size: 14px; }
 
 .hint { font-size: 11.5px; color: var(--muted); }
 
@@ -262,116 +262,6 @@ body.light {
   background: var(--chrome);
 }
 
-/* --- auth forms --- */
-.hidden { display: none; }
-
-/* Login page only: keep the account controls compact and visually separate
-   from the full-size code editor layout. */
-body.auth-page {
-  min-height: 100vh;
-  align-items: center;
-  padding: 24px 16px;
-}
-
-.auth-page .app {
-  max-width: 460px;
-}
-
-.auth-hero {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-top: none;
-  padding: 28px 30px 22px;
-}
-
-.auth-hero h1 {
-  font-family: var(--display);
-  font-size: 30px;
-  line-height: 1.1;
-  margin: 0;
-  letter-spacing: -0.02em;
-}
-
-.auth-hero p {
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.6;
-  margin: 10px 0 0;
-}
-
-.auth-card {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-top: none;
-  padding: 24px 30px 28px;
-}
-
-.auth-tabs {
-  display: flex;
-  gap: 6px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 14px;
-}
-
-.auth-form {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 10px 0 4px;
-}
-
-/* This must follow .auth-form: both selectors have the same specificity. */
-.auth-form.hidden { display: none; }
-.auth-form label {
-  font-size: 11.5px;
-  color: var(--muted);
-  margin-top: 8px;
-}
-.auth-form input {
-  background: var(--chrome);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 13.5px;
-  padding: 9px 12px;
-}
-.auth-form input:focus {
-  outline: none;
-  border-color: var(--teal);
-}
-.auth-form button {
-  margin-top: 16px;
-  background: var(--teal);
-  color: #0b1210;
-  border: none;
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-weight: 600;
-  font-size: 13.5px;
-  padding: 10px 20px;
-  cursor: pointer;
-}
-.auth-form button:hover {
-  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.2);
-}
-.auth-message {
-  font-size: 12px;
-  margin-top: 10px;
-  min-height: 16px;
-}
-.auth-message.error { color: var(--coral); }
-.auth-message.success { color: var(--green); }
-
-.auth-footer {
-  border: 1px solid var(--border);
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  color: var(--muted);
-  font-size: 11px;
-  padding: 12px 30px;
-  text-align: center;
-}
 /* --- mobile responsiveness --- */
 @media (max-width: 760px) {
 
@@ -543,8 +433,6 @@ body.auth-page {
   }
 }
 
-
-
 /* === DASHBOARD STYLES === */
 .dashboard-section {
   background: var(--panel);
@@ -657,13 +545,124 @@ body.auth-page {
   overflow-y: auto;
 }
 
-.auth-link {
-  color: var(--teal);
-  font-size: 12px;
-  text-decoration: none;
-  padding: 4px 8px;
+/* === LOADING & ERROR STATES (NEW) === */
+
+.hidden {
+  display: none !important;
 }
 
-.auth-link:hover {
-  text-decoration: underline;
+.dashboard-loading,
+.dashboard-error {
+  padding: 24px;
+  text-align: center;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.dashboard-loading {
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+}
+
+.dashboard-loading p {
+  font-size: 14px;
+  margin: 0;
+}
+
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border);
+  border-top-color: var(--teal);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.dashboard-error {
+  background: rgba(242, 99, 122, 0.1);
+  border: 1px solid var(--coral);
+}
+
+.dashboard-error p {
+  color: var(--coral);
+  font-size: 14px;
+  margin: 0;
+}
+
+/* Mobile loading/error states */
+@media (max-width: 760px) {
+  .dashboard-loading,
+  .dashboard-error {
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border-width: 2px;
+  }
+}
+
+/* === DOWNLOAD REPORT BUTTON === */
+
+.download-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--amber);
+  color: #0b1210;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 16px;
+  cursor: pointer;
+  margin-top: 16px;
+  width: 100%;
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.download-btn:hover:not(:disabled) {
+  box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.2);
+  transform: translateY(-1px);
+}
+
+.download-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.download-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.download-btn:disabled:hover {
+  box-shadow: none;
+}
+
+.btn-icon {
+  font-size: 14px;
+}
+
+/* Mobile styling */
+@media (max-width: 760px) {
+  .download-btn {
+    font-size: 12px;
+    padding: 9px 12px;
+    margin-top: 12px;
+  }
 }
