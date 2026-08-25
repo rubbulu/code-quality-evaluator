@@ -2,6 +2,7 @@ const editor = CodeMirror.fromTextArea(document.getElementById("codeEditor"), {
   lineNumbers: true,
   mode: "javascript",
   theme: "dracula",
+  lineWrapping: true,
 });
 
 // theme toggle

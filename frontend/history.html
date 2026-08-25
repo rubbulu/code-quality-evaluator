@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>History — Code Quality Evaluator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app">
+
+    <div class="titlebar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="titlebar-name">code-quality-evaluator — history</div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
+    </div>
+
+    <header class="hero">
+      <div class="eyebrow">// your saved analyses</div>
+      <h1 style="font-size: 32px;">Analysis History</h1>
+    </header>
+
+    <div class="pane" style="max-width: 700px; margin: 0 auto;">
+      <div class="report-label">Past Reports</div>
+      <div id="historyList" class="issues-list" style="max-height: none;">
+        <div class="issue-empty">Loading…</div>
+      </div>
+    </div>
+
+    <div class="statusbar">
+      <span>History</span>
+      <span class="statusbar-sep">•</span>
+      <span id="statusReady">Ready</span>
+      <span class="statusbar-spacer"></span>
+      <span>Code Quality Evaluator v0.1</span>
+    </div>
+
+  </div>
+
+  <script src="js/history.js"></script>
+</body>
+</html>

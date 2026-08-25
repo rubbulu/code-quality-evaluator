@@ -15,6 +15,10 @@
   --display: 'Inter', sans-serif;
 }
 
+html, body {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   background: var(--bg);
@@ -90,7 +94,12 @@ body {
   .workspace { grid-template-columns: 1fr; }
 }
 
-.pane { background: var(--panel); padding: 20px; }
+.pane {
+  background: var(--panel);
+  padding: 20px;
+  min-width: 0;
+  overflow: hidden;
+}
 
 /* editor pane */
 .tabstrip {
@@ -98,6 +107,7 @@ body {
   gap: 4px;
   margin-bottom: 14px;
   border-bottom: 1px solid var(--border);
+  overflow-x: auto;
 }
 .tab {
   background: none;
@@ -109,16 +119,27 @@ body {
   cursor: pointer;
   border-bottom: 2px solid transparent;
   transition: color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
 }
 .tab:hover { color: var(--text); }
 .tab.active { color: var(--teal); border-bottom-color: var(--teal); }
 
 .CodeMirror {
-  height: 340px;
+  max-height: 340px;
   border: 1px solid var(--border);
   border-radius: 6px;
   font-family: var(--mono);
   font-size: 13.5px;
+  width: 100%;
+}
+
+.CodeMirror-scroll {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+}
+
+.CodeMirror-lines {
+  word-break: break-word;
 }
 
 .editor-footer {
@@ -126,6 +147,7 @@ body {
   align-items: center;
   gap: 14px;
   margin-top: 14px;
+  flex-wrap: wrap;
 }
 
 button#analyzeBtn {
@@ -262,11 +284,64 @@ body.light {
   background: var(--chrome);
 }
 
+/* === AUTH FORMS (login / signup) === */
+.hidden { display: none !important; }
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 0 4px;
+}
+.auth-form label {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.auth-form input {
+  background: var(--chrome);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13.5px;
+  padding: 9px 12px;
+}
+.auth-form input::placeholder {
+  color: var(--muted);
+  opacity: 0.7;
+}
+.auth-form input:focus {
+  outline: none;
+  border-color: var(--teal);
+}
+.auth-form button {
+  margin-top: 16px;
+  background: var(--teal);
+  color: #0b1210;
+  border: none;
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+.auth-form button:hover {
+  box-shadow: 0 0 0 3px rgba(79, 209, 197, 0.2);
+}
+.auth-message {
+  font-size: 12px;
+  margin-top: 10px;
+  min-height: 16px;
+}
+.auth-message.error { color: var(--coral); }
+.auth-message.success { color: var(--green); }
+
 /* --- mobile responsiveness --- */
 @media (max-width: 760px) {
 
-  html,
-  body {
+  html, body {
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
@@ -283,7 +358,6 @@ body.light {
     min-width: 0;
   }
 
-  /* Title bar */
   .titlebar {
     width: 100%;
     padding: 9px 10px;
@@ -299,11 +373,8 @@ body.light {
     white-space: nowrap;
   }
 
-  .titlebar-status {
-    font-size: 10px;
-  }
+  .titlebar-status { font-size: 10px; }
 
-  /* Hero */
   .hero {
     width: 100%;
     padding: 22px 16px 18px;
@@ -314,11 +385,8 @@ body.light {
     line-height: 1.1;
   }
 
-  .eyebrow {
-    font-size: 11px;
-  }
+  .eyebrow { font-size: 11px; }
 
-  /* Workspace */
   .workspace {
     width: 100%;
     min-width: 0;
@@ -333,7 +401,6 @@ body.light {
     padding: 14px;
   }
 
-  /* Language tabs */
   .tabstrip {
     width: 100%;
     min-width: 0;
@@ -349,7 +416,6 @@ body.light {
     font-size: 11px;
   }
 
-  /* Code editor */
   .CodeMirror {
     width: 100%;
     max-width: 100%;
@@ -357,7 +423,6 @@ body.light {
     font-size: 12px;
   }
 
-  /* Analyze button + hint */
   .editor-footer {
     width: 100%;
     flex-wrap: wrap;
@@ -369,14 +434,8 @@ body.light {
     padding: 9px 15px;
   }
 
-  .hint {
-    font-size: 10px;
-  }
-
-  /* Report */
-  .report-label {
-    font-size: 10px;
-  }
+  .hint { font-size: 10px; }
+  .report-label { font-size: 10px; }
 
   .ring-wrap {
     width: 120px;
@@ -390,9 +449,7 @@ body.light {
     display: block;
   }
 
-  .ring-score {
-    font-size: 24px;
-  }
+  .ring-score { font-size: 24px; }
 
   .issues-list {
     width: 100%;
@@ -404,7 +461,6 @@ body.light {
     font-size: 11px;
   }
 
-  /* Status bar */
   .statusbar {
     width: 100%;
     flex-wrap: wrap;
@@ -413,24 +469,14 @@ body.light {
     font-size: 10px;
   }
 
-  .statusbar-spacer {
-    display: none;
-  }
+  .statusbar-spacer { display: none; }
 }
 
 /* Tablet / Nest Hub */
 @media (min-width: 761px) and (max-width: 1100px) {
-  .app {
-    max-width: 95%;
-  }
-
-  .hero {
-    padding: 30px 24px 24px;
-  }
-
-  .workspace {
-    grid-template-columns: 1.4fr 1fr;
-  }
+  .app { max-width: 95%; }
+  .hero { padding: 30px 24px 24px; }
+  .workspace { grid-template-columns: 1.4fr 1fr; }
 }
 
 /* === DASHBOARD STYLES === */
@@ -468,14 +514,12 @@ body.light {
 
 .dashboard-card canvas {
   max-height: 100%;
-  color: var(--text);
 }
 
 .card-title {
   font-family: var(--display);
   font-size: 13px;
   font-weight: 600;
-  color: var(--text);
   margin: 0 0 14px 0;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -495,10 +539,7 @@ body.light {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
-
-.metric:last-child {
-  border-bottom: none;
-}
+.metric:last-child { border-bottom: none; }
 
 .metric-label {
   font-size: 12px;
@@ -513,44 +554,15 @@ body.light {
   color: var(--teal);
 }
 
-/* Mobile responsiveness for dashboard */
 @media (max-width: 760px) {
-  .dashboard-section {
-    padding: 14px;
-    margin-top: 1px;
-  }
-
-  .dashboard-title {
-    font-size: 16px;
-    margin-bottom: 14px;
-  }
-
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .dashboard-card {
-    padding: 14px;
-  }
-
-  .card-title {
-    font-size: 12px;
-    margin-bottom: 12px;
-  }
+  .dashboard-section { padding: 14px; margin-top: 1px; }
+  .dashboard-title { font-size: 16px; margin-bottom: 14px; }
+  .dashboard-grid { grid-template-columns: 1fr; gap: 12px; }
+  .dashboard-card { padding: 14px; }
+  .card-title { font-size: 12px; margin-bottom: 12px; }
 }
 
-.CodeMirror {
-  max-height: 340px;
-  overflow-y: auto;
-}
-
-/* === LOADING & ERROR STATES (NEW) === */
-
-.hidden {
-  display: none !important;
-}
-
+/* === LOADING & ERROR STATES === */
 .dashboard-loading,
 .dashboard-error {
   padding: 24px;
@@ -568,11 +580,7 @@ body.light {
   gap: 12px;
   color: var(--muted);
 }
-
-.dashboard-loading p {
-  font-size: 14px;
-  margin: 0;
-}
+.dashboard-loading p { font-size: 14px; margin: 0; }
 
 .spinner {
   display: inline-block;
@@ -583,39 +591,20 @@ body.light {
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .dashboard-error {
   background: rgba(242, 99, 122, 0.1);
   border: 1px solid var(--coral);
 }
+.dashboard-error p { color: var(--coral); font-size: 14px; margin: 0; }
 
-.dashboard-error p {
-  color: var(--coral);
-  font-size: 14px;
-  margin: 0;
-}
-
-/* Mobile loading/error states */
 @media (max-width: 760px) {
-  .dashboard-loading,
-  .dashboard-error {
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-
-  .spinner {
-    width: 18px;
-    height: 18px;
-    border-width: 2px;
-  }
+  .dashboard-loading, .dashboard-error { padding: 16px; margin-bottom: 12px; }
+  .spinner { width: 18px; height: 18px; border-width: 2px; }
 }
 
 /* === DOWNLOAD REPORT BUTTON === */
-
 .download-btn {
   display: flex;
   align-items: center;
@@ -634,35 +623,26 @@ body.light {
   width: 100%;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
 }
-
 .download-btn:hover:not(:disabled) {
   box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.2);
   transform: translateY(-1px);
 }
-
-.download-btn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
+.download-btn:active:not(:disabled) { transform: translateY(0); }
 .download-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
 }
+.download-btn:disabled:hover { box-shadow: none; }
 
-.download-btn:disabled:hover {
-  box-shadow: none;
-}
-
-.btn-icon {
-  font-size: 14px;
-}
-
-/* Mobile styling */
 @media (max-width: 760px) {
-  .download-btn {
-    font-size: 12px;
-    padding: 9px 12px;
-    margin-top: 12px;
-  }
+  .download-btn { font-size: 12px; padding: 9px 12px; margin-top: 12px; }
+}
+
+/* === LOGIN PAGE CENTERING === */
+body > .app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }

@@ -53,14 +53,12 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
     });
     const data = await res.json();
     if (res.ok) {
-      localStorage.setItem("cqe-token", data.token);
-      localStorage.setItem("cqe-user-name", data.name);
-
-      msg.textContent = "Login successful! Redirecting...";
+      localStorage.setItem("cqe-token", data.token || "");
+      localStorage.setItem("cqe-userId", data.userId || "");
+      msg.textContent = "Login successful! Redirecting…";
       msg.className = "auth-message success";
-
-      window.location.href = "index.html";
-  } else {
+      setTimeout(() => { window.location.href = "index.html"; }, 1000);
+    } else {
     msg.textContent = data.message || "Login failed";
     msg.className = "auth-message error";
   }
