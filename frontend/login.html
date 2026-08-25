@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login — Code Quality Evaluator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page">
+
+  <div class="app">
+
+    <!-- fake window titlebar -->
+    <div class="titlebar">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div class="titlebar-name">code-quality-evaluator</div>
+      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
+    </div>
+
+    <header class="auth-hero">
+      <div class="eyebrow">// account access</div>
+      <h1 id="authTitle">Sign in</h1>
+      <p id="authSubtitle">Continue analysing code and keep your work in one place.</p>
+    </header>
+
+    <main class="auth-card">
+
+      <div class="auth-tabs" id="authTabs" role="tablist" aria-label="Account access">
+        <button class="tab active" type="button" role="tab" aria-selected="true" aria-controls="loginForm" data-form="login">Log in</button>
+        <button class="tab" type="button" role="tab" aria-selected="false" aria-controls="signupForm" data-form="signup">Sign up</button>
+      </div>
+
+      <!-- LOGIN FORM -->
+      <form id="loginForm" class="auth-form" aria-label="Log in">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@example.com" required>
+
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required>
+
+        <button type="submit" id="loginBtn">▶ Log In</button>
+        <div class="auth-message" id="loginMessage"></div>
+      </form>
+
+      <!-- SIGNUP FORM -->
+      <form id="signupForm" class="auth-form hidden" aria-label="Sign up">
+        <label>Name</label>
+        <input type="text" id="signupName" placeholder="Your name" required>
+
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@example.com" required>
+
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="••••••••" required>
+
+        <button type="submit" id="signupBtn">▶ Create Account</button>
+        <div class="auth-message" id="signupMessage"></div>
+      </form>
+
+    </main>
+
+    <footer class="auth-footer">Code Quality Evaluator</footer>
+
+  </div>
+
+  <script src="js/auth.js"></script>
+</body>
+</html>
