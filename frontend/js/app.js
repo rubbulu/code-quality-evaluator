@@ -359,7 +359,7 @@ function generatePDFReport() {
 
   try {
     // Initialize jsPDF
-    const { jsPDF } = window;
+    const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
     // Set colors
