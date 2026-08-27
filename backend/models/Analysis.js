@@ -5,6 +5,7 @@ const analysisSchema = new mongoose.Schema({
   language: { type: String, required: true },
   code: { type: String, required: true },
   score: { type: Number, required: true },
+  favorite: { type: Boolean, default: false },
   timestamp: { type: Date, default: Date.now }
 });
 
