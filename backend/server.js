@@ -6,6 +6,8 @@ const authRoutes = require('./routes/auth');
 const analyzeHTML = require('./analyzers/htmlAnalyzer');
 const analyzeCSS = require('./analyzers/cssAnalyzer');
 const analyzeJS = require('./analyzers/jsAnalyzer');
+const analyzePython = require('./analyzers/pythonAnalyzer');
+const analyzeClike = require('./analyzers/clikeAnalyzer');
 
 const app = express();
 app.use(cors());
@@ -50,6 +52,12 @@ app.post('/api/analyze', (req, res) => {
       result = analyzeCSS(code);
     } else if (language === "javascript") {
       result = analyzeJS(code);
+    } else if (language === "javascript") {
+      result = analyzeJS(code);
+    } else if (language === "python") {
+      result = analyzePython(code);
+    } else if (language === "clike") {
+      result = analyzeClike(code);  
     } else {
       result = { score: 85, errors: [], message: "Placeholder response (real analysis coming soon)" };
     }
