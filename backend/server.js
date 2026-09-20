@@ -8,6 +8,9 @@ const analyzeCSS = require('./analyzers/cssAnalyzer');
 const analyzeJS = require('./analyzers/jsAnalyzer');
 const analyzePython = require('./analyzers/pythonAnalyzer');
 const analyzeClike = require('./analyzers/clikeAnalyzer');
+const historyRoutes = require('./routes/history');
+const verifyToken = require('./middleware/verifyToken');
+const Analysis = require('./models/Analysis');
 
 const app = express();
 app.use(cors());
@@ -15,6 +18,7 @@ app.use(express.json());
 connectDB();
 
 app.use('/api/auth', authRoutes);
+app.use('/api/history', historyRoutes);
 
 const PORT = process.env.PORT || 5000;
 
@@ -22,10 +26,16 @@ app.get('/', (req, res) => {
   res.send('Code Quality Evaluator backend is running');
 });
 
+// Login is optional: only verify the token if one was sent
+const optionalAuth = (req, res, next) => {
+  if (!req.headers.authorization) return next();
+  return verifyToken(req, res, next);
+};
+
 const ALLOWED_LANGUAGES = ["javascript", "python", "clike", "htmlmixed", "css"];
 const MAX_CODE_LENGTH = 20000;
 
-app.post('/api/analyze', (req, res) => {
+app.post('/api/analyze', optionalAuth, async (req, res) => {
   const { language, code } = req.body;
 
   if (language === undefined || code === undefined) {
@@ -52,18 +62,31 @@ app.post('/api/analyze', (req, res) => {
       result = analyzeCSS(code);
     } else if (language === "javascript") {
       result = analyzeJS(code);
-    } else if (language === "javascript") {
-      result = analyzeJS(code);
     } else if (language === "python") {
       result = analyzePython(code);
     } else if (language === "clike") {
-      result = analyzeClike(code);  
+      result = analyzeClike(code);
     } else {
       result = { score: 85, errors: [], message: "Placeholder response (real analysis coming soon)" };
     }
   } catch (err) {
     console.error("Analysis error:", err);
     return res.status(500).json({ score: 0, errors: [], message: "Something went wrong while analyzing your code" });
+  }
+
+  // Save to history only when the user is logged in
+  if (req.userId) {
+    try {
+      const saved = await Analysis.create({
+        userId: req.userId,
+        language,
+        code,
+        score: result.score
+      });
+      result.analysisId = saved._id;
+    } catch (err) {
+      console.error("History save failed:", err.message);
+    }
   }
 
   res.json(result);

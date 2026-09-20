@@ -294,9 +294,14 @@ async function runAnalysis() {
   statusReady.innerText = "Analyzing…";
   
   try {
+    const token = localStorage.getItem('cqe-token');
+
     const response = await fetch("http://localhost:5000/api/analyze", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({ language, code })
     });
     
