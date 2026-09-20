@@ -43,7 +43,7 @@ async function loadHistory() {
     }
 
     list.innerHTML = analyses.map(a => {
-      const date = a.createdAt ? new Date(a.createdAt).toLocaleDateString() : "Unknown date";
+      const date = a.timestamp ? new Date(a.timestamp).toLocaleString() : "Unknown date";
       const language = a.language || "unknown";
       const score = a.score ?? "—";
       return `
