@@ -646,3 +646,17 @@ body > .app {
   flex-direction: column;
   justify-content: center;
 }
+
+.sug-card { border: 1px solid #2c3040; border-radius: 8px; padding: 12px; margin: 12px 0; background: rgba(255,255,255,0.03); }
+.sug-card.weak   { border-left: 5px solid #f2637a; }
+.sug-card.better { border-left: 5px solid #e8a33d; }
+.sug-card.best   { border-left: 5px solid #6fcf97; box-shadow: 0 0 12px rgba(111,207,151,.35); }
+.sug-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.badge { padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+.badge.weak   { background: #f2637a; color: #fff; }
+.badge.better { background: #e8a33d; color: #000; }
+.badge.best   { background: #6fcf97; color: #000; }
+.sug-meta { font-family: monospace; margin: 6px 0; opacity: .85; }
+.sug-reason { margin: 4px 0 8px; }
+.sug-card pre { overflow-x: auto; padding: 10px; border-radius: 6px; background: rgba(0,0,0,.25); font-size: 13px; }
+.ai-note { font-size: 12px; opacity: .7; }

@@ -11,6 +11,7 @@ const analyzeClike = require('./analyzers/clikeAnalyzer');
 const historyRoutes = require('./routes/history');
 const verifyToken = require('./middleware/verifyToken');
 const Analysis = require('./models/Analysis');
+const suggestRoute = require('./routes/suggest');
 
 const app = express();
 app.use(cors());
@@ -91,6 +92,8 @@ app.post('/api/analyze', optionalAuth, async (req, res) => {
 
   res.json(result);
 });
+
+app.use('/api', suggestRoute);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

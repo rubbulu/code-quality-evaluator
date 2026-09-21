@@ -33,6 +33,12 @@ function currentLanguage() {
   return document.querySelector(".tab.active").dataset.mode;
 }
 
+// human-readable language name (e.g. "Python", "Java") used for AI prompts
+function currentLanguageLabel() {
+  const active = document.querySelector(".tab.active");
+  return (active && active.dataset.label) || currentLanguage();
+}
+
 // quality ring
 const RING_CIRCUMFERENCE = 377;
 function updateRing(score) {
@@ -289,6 +295,9 @@ async function runAnalysis() {
     return;
   }
 
+  // Clear old AI suggestions (they belong to the previous code)
+  clearSuggestions();
+
   // Show loading state
   showDashboardLoading(true);
   statusReady.innerText = "Analyzing…";
@@ -355,6 +364,90 @@ document.getElementById("analyzeBtn").addEventListener("click", runAnalysis);
 editor.setOption("extraKeys", {
   "Ctrl-Enter": runAnalysis
 });
+
+// ===== AI SUGGESTIONS =====
+// Needs in index.html:  <button id="suggestBtn">  and  <div id="suggestions">
+function clearSuggestions() {
+  const box = document.getElementById("suggestions");
+  if (box) box.innerHTML = "";
+}
+
+function renderSuggestions(list, note) {
+  const box = document.getElementById("suggestions");
+  if (!box) return;
+  box.innerHTML = "";
+
+  const label = document.createElement("p");
+  label.className = "ai-note";
+  label.textContent = note || "AI-generated suggestions. Verify complexity before relying on it.";
+  box.appendChild(label);
+
+  list.forEach(s => {
+    const card = document.createElement("div");
+    card.className = `sug-card ${s.verdict}`;
+
+    const head = document.createElement("div");
+    head.className = "sug-head";
+
+    const title = document.createElement("strong");
+    title.textContent = s.name;
+
+    const badge = document.createElement("span");
+    badge.className = `badge ${s.verdict}`;
+    badge.textContent = s.verdict === "best" ? "🏆 BEST" : s.verdict.toUpperCase();
+
+    head.append(title, badge);
+
+    const meta = document.createElement("div");
+    meta.className = "sug-meta";
+    meta.textContent = `Time: ${s.time}  |  Space: ${s.space}`;
+
+    const reason = document.createElement("p");
+    reason.className = "sug-reason";
+    reason.textContent = s.reason;
+
+    const pre = document.createElement("pre");
+    const codeEl = document.createElement("code");
+    codeEl.textContent = s.code; // textContent on purpose: never inject AI output as HTML
+    pre.appendChild(codeEl);
+
+    card.append(head, meta, reason, pre);
+    box.appendChild(card);
+  });
+}
+
+async function getSuggestions() {
+  const box = document.getElementById("suggestions");
+  const btn = document.getElementById("suggestBtn");
+  if (!box || !btn) return;
+
+  const code = editor.getValue();
+  if (!code || code.trim().length === 0) {
+    box.textContent = "Write some code first.";
+    return;
+  }
+
+  btn.disabled = true;
+  box.textContent = "Generating suggestions… this can take a few seconds.";
+
+  try {
+    const response = await fetch("http://localhost:5000/api/suggest", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, language: currentLanguageLabel() })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || `Request failed (${response.status})`);
+    renderSuggestions(data.suggestions, data.note);
+  } catch (err) {
+    box.textContent = `Could not get suggestions: ${err.message}`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+const suggestBtnEl = document.getElementById("suggestBtn");
+if (suggestBtnEl) suggestBtnEl.addEventListener("click", getSuggestions);
 
 // ===== PDF REPORT GENERATION =====
 function generatePDFReport() {
