@@ -33,8 +33,33 @@ router.post('/login', async (req, res) => {
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) return res.status(400).json({ message: 'Invalid credentials' });
 
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '90d' });
     res.json({ token, userId: user._id, name: user.name });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+});
+
+router.post('/reset-password', async (req, res) => {
+  try {
+    const { email, newPassword } = req.body;
+    if (!email || !newPassword) {
+      return res.status(400).json({ message: 'Email and new password are required' });
+    }
+    if (newPassword.length < 4) {
+      return res.status(400).json({ message: 'Password must be at least 4 characters' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: 'No account found with this email' });
+    }
+
+    user.passwordHash = await bcrypt.hash(newPassword, 10);
+    await user.save();
+
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '90d' });
+    res.json({ message: 'Password updated successfully!', token, userId: user._id, name: user.name });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
