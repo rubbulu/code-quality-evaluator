@@ -3,42 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Code Quality Evaluator</title>
+<title>Code Quality Evaluator - Studio</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@600;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+<link rel="stylesheet" href="css/style.css?v=3.0">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
-  <div class="app">
+  <div class="studio-app">
 
-    <!-- fake window titlebar -->
-    <div class="titlebar">
-      <div class="dots"><span></span><span></span><span></span></div>
-      <div class="titlebar-name">code-quality-evaluator — main</div>
-      <div class="titlebar-status" id="connStatus">● checking backend…</div>
+    <!-- TOP NAVIGATION BAR -->
+    <header class="studio-nav">
+      <div class="nav-left">
+        <div class="dots"><span></span><span></span><span></span></div>
+        <div class="brand">
+          <span class="brand-icon">⚡</span>
+          <span class="brand-name">Code Quality Evaluator</span>
+          <span class="brand-pill">v1.0 Pro</span>
+        </div>
+        <div class="conn-status" id="connStatus">● checking backend…</div>
+      </div>
 
-      <!-- Filled by the script at the bottom: Log in/Sign up OR History + Logout -->
-      <span id="authLinks">
-        <a class="auth-link" href="login.html">Log in / Sign up</a>
-      </span>
-
-      <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
-    </div>
-
-    <header class="hero">
-      <div class="eyebrow">// static analysis, on demand</div>
-      <h1>Code Quality<br>Evaluator</h1>
-    </header>
-
-    <div class="workspace">
-
-      <!-- LEFT: editor pane -->
-      <div class="pane editor-pane">
+      <!-- CENTER: LANGUAGE TABS -->
+      <div class="nav-center">
         <div class="tabstrip" id="langTabs">
           <button class="tab active" data-mode="javascript" data-label="JavaScript">JavaScript</button>
           <button class="tab" data-mode="python" data-label="Python">Python</button>
@@ -46,102 +37,502 @@
           <button class="tab" data-mode="htmlmixed" data-label="HTML">HTML</button>
           <button class="tab" data-mode="css" data-label="CSS">CSS</button>
         </div>
-        <textarea id="codeEditor"></textarea>
-        <div class="editor-footer">
-          <button id="analyzeBtn">
-            <span class="btn-icon">▶️</span> Analyze
-          </button>
-          <span class="hint">Ctrl + Enter also works</span>
-        </div>
       </div>
 
-      <!-- RIGHT: report pane -->
-      <div class="pane report-pane">
-        <div class="report-label">Quality Score</div>
-        <div class="ring-wrap">
-          <svg class="ring" width="140" height="140" viewBox="0 0 140 140">
-            <circle class="ring-track" cx="70" cy="70" r="60"></circle>
-            <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="60"></circle>
-          </svg>
-          <div class="ring-score" id="ringScore">—</div>
-        </div>
-        <div class="report-label">Issues</div>
-        <div id="issuesList" class="issues-list">
-          <div class="issue-empty">Run an analysis to see results here.</div>
-        </div>
-
-        <!-- DOWNLOAD BUTTON -->
-        <button id="downloadReportBtn" class="download-btn" title="Download analysis as PDF" disabled>
-          <span class="btn-icon">📥</span> Download Report
+      <!-- RIGHT: PRIMARY ACTIONS & AUTH -->
+      <div class="nav-right">
+        <button id="analyzeBtn" class="primary-btn" title="Analyze Code (Ctrl + Enter)">
+          <span class="btn-icon">▶</span>
+          <span>Analyze</span>
         </button>
+
+        <button id="suggestBtn" class="ai-btn" title="Get Gemini AI Alternative Implementations">
+          <span class="btn-icon">✨</span>
+          <span>AI Suggestions</span>
+        </button>
+
+        <button id="rulesModalBtn" class="secondary-btn" title="Configure Linter Rules & Thresholds">
+          <span class="btn-icon">⚙️</span>
+          <span>Rules</span>
+        </button>
+
+        <button id="badgeModalBtn" class="secondary-btn" title="Generate GitHub README Badges">
+          <span class="btn-icon">🏷️</span>
+          <span>Badges</span>
+        </button>
+
+        <button id="downloadReportBtn" class="secondary-btn" title="Download PDF Quality Report" disabled>
+          <span class="btn-icon">📥</span>
+          <span>Export PDF</span>
+        </button>
+
+        <button class="theme-toggle" id="themeToggle" title="Toggle light/dark mode">☀️</button>
+
+        <span id="authLinks">
+          <a class="auth-link" href="history.html">History</a>
+          <a class="auth-link" href="login.html">Log in / Sign up</a>
+        </span>
       </div>
-    </div>
+    </header>
 
-    <!-- DASHBOARD SECTION -->
-    <div class="dashboard-section">
-      <div class="dashboard-title">📊 Analysis Dashboard</div>
+    <!-- MAIN TWO-COLUMN STUDIO WORKBENCH -->
+    <main class="studio-workbench">
 
-      <!-- Loading State -->
-      <div id="dashboardLoading" class="dashboard-loading hidden">
-        <span class="spinner"></span>
-        <p>Analyzing code...</p>
-      </div>
+      <!-- LEFT COLUMN: CODE EDITOR & IN-EDITOR HIGHLIGHTS -->
+      <section class="editor-column">
+        <div class="column-header">
+          <div class="file-label">
+            <span class="file-icon">📄</span>
+            <span id="editorFileTitle">Source Code</span>
+            <span class="issue-count-badge" id="editorIssueBadge">0 issues</span>
+          </div>
 
-      <!-- Error State -->
-      <div id="dashboardError" class="dashboard-error hidden">
-        <p id="errorMessage"></p>
-      </div>
-
-      <div class="dashboard-grid">
-        <!-- Error Breakdown Chart -->
-        <div class="dashboard-card">
-          <h3 class="card-title">Error Breakdown</h3>
-          <canvas id="errorBreakdownChart" height="200"></canvas>
+          <div class="editor-header-tools">
+            <select id="snippetPicker" class="snippet-select" title="Load sample test cases">
+              <option value="">⚡ Load Sample Code...</option>
+              <option value="java_errors">Java: Type, Syntax & Security Errors</option>
+              <option value="js_scope">JavaScript: Complexity & Scope</option>
+              <option value="python_style">Python: PEP8 & Naming Issues</option>
+              <option value="html_sample">HTML: Semantic & Accessibility</option>
+              <option value="css_sample">CSS: Style & Overly Specific Rules</option>
+              <option value="clean_example">Clean Compliant Code (100/100)</option>
+            </select>
+            <button id="clearEditorBtn" class="tool-btn" title="Clear Editor">Clear</button>
+          </div>
         </div>
 
-        <!-- Language Breakdown Chart -->
-        <div class="dashboard-card">
-          <h3 class="card-title">Language Coverage</h3>
-          <canvas id="languageBreakdownChart" height="200"></canvas>
+        <div class="editor-wrapper">
+          <textarea id="codeEditor"></textarea>
         </div>
 
-        <!-- Complexity Indicator -->
-        <div class="dashboard-card">
-          <h3 class="card-title">Code Metrics</h3>
-          <div id="complexityMetrics" class="metrics-container">
-            <div class="metric">
-              <span class="metric-label">Complexity</span>
-              <span class="metric-value" id="metricComplexity">—</span>
+        <div class="editor-statusbar">
+          <div class="status-left">
+            <span class="status-item"><strong id="statusLang">JavaScript</strong></span>
+            <span class="status-dot">•</span>
+            <span class="status-item" id="statusReady">Ready</span>
+            <span class="status-dot">•</span>
+            <span class="status-item hint-text">Ctrl + Enter to run</span>
+          </div>
+          <div class="status-right">
+            <span class="status-pill">Complexity: <strong id="quickComplexity">—</strong></span>
+            <span class="status-pill">Duplicates: <strong id="quickDuplicates">0</strong></span>
+            <span class="status-pill">Lines: <strong id="quickLOC">0</strong></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN: MULTI-TAB STUDIO INSPECTOR -->
+      <section class="inspector-column">
+
+        <!-- INSPECTOR NAVIGATION TABS -->
+        <div class="inspector-tabs">
+          <button class="inspector-tab active" data-target="panelIssues">
+            <span class="tab-icon">📋</span>
+            <span>Issues & Score</span>
+            <span class="tab-badge" id="badgeIssueCount">0</span>
+          </button>
+          <button class="inspector-tab" data-target="panelSuggestions">
+            <span class="tab-icon">✨</span>
+            <span>AI Alternatives</span>
+          </button>
+          <button class="inspector-tab" data-target="panelDashboard">
+            <span class="tab-icon">📊</span>
+            <span>Metrics & Charts</span>
+          </button>
+        </div>
+
+        <!-- PANEL 1: ISSUES & SCORE -->
+        <div class="inspector-panel active" id="panelIssues">
+          <!-- SCORE SUMMARY CARD -->
+          <div class="score-card">
+            <div class="ring-wrap">
+              <svg class="ring" width="130" height="130" viewBox="0 0 140 140">
+                <circle class="ring-track" cx="70" cy="70" r="60"></circle>
+                <circle class="ring-fill" id="ringFill" cx="70" cy="70" r="60"></circle>
+              </svg>
+              <div class="ring-score-wrap">
+                <div class="ring-score" id="ringScore">—</div>
+                <div class="ring-caption">SCORE / 100</div>
+              </div>
             </div>
-            <div class="metric">
-              <span class="metric-label">Duplicates</span>
-              <span class="metric-value" id="metricDuplicates">—</span>
+
+            <div class="score-meta">
+              <div class="verdict-row">
+                <div class="verdict-label" id="scoreVerdict">Awaiting Analysis</div>
+                <span class="grade-badge" id="scoreGrade">GRADE —</span>
+              </div>
+              <p class="verdict-desc" id="scoreDescription">Click "Analyze" to inspect syntax, types, complexity, security, and tech debt.</p>
+              <div class="score-stats-row">
+                <span class="stat-pill" id="statErrorsCount">0 Errors</span>
+                <span class="stat-pill" id="statWarningsCount">0 Warnings</span>
+                <span class="stat-pill security-pill" id="statSecurityPill">🛡️ 0 Security</span>
+                <span class="stat-pill debt-pill" id="statDebtPill">⏱️ Debt: —</span>
+                <button class="stat-pill badge-pill-btn" id="quickBadgePill" title="Generate README Badges for this score">🏷️ Badges</button>
+              </div>
             </div>
-            <div class="metric">
-              <span class="metric-label">Total Issues</span>
-              <span class="metric-value" id="metricIssues">—</span>
+          </div>
+
+          <!-- ISSUES SECTION HEADER -->
+          <div class="section-subhead">
+            <span>Detected Issues with Explanations</span>
+            <span class="hint-small">Click any issue to highlight & jump to line</span>
+          </div>
+
+          <!-- DETAILED ISSUES LIST -->
+          <div id="issuesList" class="issues-list">
+            <div class="issue-empty">
+              <span class="empty-icon">🔍</span>
+              <p>Run an analysis to review detected issues and actionable fix guides.</p>
             </div>
           </div>
         </div>
 
-        <!-- Score Distribution Chart -->
-        <div class="dashboard-card">
-          <h3 class="card-title">Score Distribution</h3>
-          <canvas id="scoreDistributionChart" height="200"></canvas>
+        <!-- PANEL 2: AI ALTERNATIVES -->
+        <div class="inspector-panel" id="panelSuggestions">
+          <div id="suggestions">
+            <div class="suggest-empty-state">
+              <div class="empty-icon">💡</div>
+              <div class="empty-title">AI Alternative Implementations</div>
+              <p class="empty-desc">Click <strong>"AI Suggestions"</strong> in the top toolbar to generate Naive, Clean, and High-Performance solutions with Big-O complexity analysis.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- PANEL 3: METRICS & CHARTS -->
+        <div class="inspector-panel" id="panelDashboard">
+
+          <!-- 6 STAT METRICS CARDS -->
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon">📐</div>
+              <div class="metric-info">
+                <span class="metric-title">Cyclomatic Complexity</span>
+                <span class="metric-big" id="metricComplexity">—</span>
+                <span class="metric-sub" id="metricComplexityDesc">Branching paths</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">🔁</div>
+              <div class="metric-info">
+                <span class="metric-title">Duplicate Lines</span>
+                <span class="metric-big" id="metricDuplicates">0</span>
+                <span class="metric-sub">Repeated statements</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">⏱️</div>
+              <div class="metric-info">
+                <span class="metric-title">Technical Debt</span>
+                <span class="metric-big" id="metricDebt">—</span>
+                <span class="metric-sub" id="metricDebtDesc">Estimated remediation</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">🛡️</div>
+              <div class="metric-info">
+                <span class="metric-title">Security & Leaks</span>
+                <span class="metric-big" id="metricSecurity">0</span>
+                <span class="metric-sub" id="metricSecurityDesc">Secrets & vulnerabilities</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">🚨</div>
+              <div class="metric-info">
+                <span class="metric-title">Total Issues</span>
+                <span class="metric-big" id="metricIssues">—</span>
+                <span class="metric-sub">Errors + Warnings</span>
+              </div>
+            </div>
+
+            <div class="metric-card">
+              <div class="metric-icon">📝</div>
+              <div class="metric-info">
+                <span class="metric-title">Lines of Code (LOC)</span>
+                <span class="metric-big" id="metricLOC">—</span>
+                <span class="metric-sub">Non-empty lines</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHARTS GRID -->
+          <div class="charts-grid">
+            <div class="chart-card">
+              <div class="chart-title">Error Breakdown</div>
+              <div class="chart-container">
+                <canvas id="errorBreakdownChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card">
+              <div class="chart-title">Score Distribution</div>
+              <div class="chart-container">
+                <canvas id="scoreDistributionChart"></canvas>
+              </div>
+            </div>
+
+            <div class="chart-card full-width">
+              <div class="chart-title">Language Coverage</div>
+              <div class="chart-container">
+                <canvas id="languageBreakdownChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+    </main>
+
+  </div>
+
+  <!-- =========================================================
+       MODAL 1: VISUAL DIFF VIEWER (BEFORE VS AFTER)
+       ========================================================= -->
+  <div id="diffModal" class="studio-modal-backdrop" style="display: none;">
+    <div class="studio-modal diff-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🔀</span>
+          <div>
+            <h3 class="modal-title" id="diffModalTitle">Visual Code Comparison</h3>
+            <span class="modal-subtitle">Original Editor Code vs. AI Suggestion</span>
+          </div>
+        </div>
+        <div class="modal-header-actions">
+          <div class="diff-view-toggle">
+            <button id="diffSplitViewBtn" class="diff-toggle-btn active">Split View</button>
+            <button id="diffUnifiedViewBtn" class="diff-toggle-btn">Unified</button>
+          </div>
+          <button id="closeDiffModalBtn" class="modal-close-btn" title="Close (Esc)">✕</button>
+        </div>
+      </div>
+
+      <div class="modal-body diff-modal-body">
+        <!-- Side by Side View -->
+        <div id="diffSplitContainer" class="diff-split-container">
+          <div class="diff-pane diff-pane-original">
+            <div class="diff-pane-header">
+              <span class="pane-badge original">Current Code</span>
+              <span class="diff-stat" id="diffOriginalLines">0 lines</span>
+            </div>
+            <div class="diff-code-wrapper" id="diffOriginalCode"></div>
+          </div>
+
+          <div class="diff-pane diff-pane-suggested">
+            <div class="diff-pane-header">
+              <span class="pane-badge suggested">AI Alternative</span>
+              <span class="diff-stat" id="diffSuggestedLines">0 lines</span>
+            </div>
+            <div class="diff-code-wrapper" id="diffSuggestedCode"></div>
+          </div>
+        </div>
+
+        <!-- Unified View -->
+        <div id="diffUnifiedContainer" class="diff-unified-container" style="display: none;">
+          <div class="diff-pane-header">
+            <span class="pane-badge suggested">Unified Diff</span>
+            <span class="diff-stat" id="diffUnifiedLines">0 lines</span>
+          </div>
+          <div class="diff-code-wrapper" id="diffUnifiedCode"></div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div class="diff-legend">
+          <span class="legend-item added"><span class="legend-box plus">+</span> Added / Refactored</span>
+          <span class="legend-item removed"><span class="legend-box minus">-</span> Original / Removed</span>
+        </div>
+        <div class="modal-footer-actions">
+          <button id="cancelDiffBtn" class="modal-btn secondary">Close</button>
+          <button id="applyDiffBtn" class="modal-btn primary">⚡ Apply Suggestion to Editor</button>
         </div>
       </div>
     </div>
-
-    <!-- fake status bar -->
-    <div class="statusbar">
-      <span id="statusLang">JavaScript</span>
-      <span class="statusbar-sep">•</span>
-      <span id="statusReady">Ready</span>
-      <span class="statusbar-spacer"></span>
-      <span>Code Quality Evaluator v0.1</span>
-    </div>
-
   </div>
+
+  <!-- =========================================================
+       MODAL 2: INTERACTIVE LINTER RULES CONFIGURATOR
+       ========================================================= -->
+  <div id="rulesModal" class="studio-modal-backdrop" style="display: none;">
+    <div class="studio-modal rules-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">⚙️</span>
+          <div>
+            <h3 class="modal-title">Linter & Analyzer Configuration</h3>
+            <span class="modal-subtitle">Customize static analysis rules, security checks, and complexity limits</span>
+          </div>
+        </div>
+        <button id="closeRulesModalBtn" class="modal-close-btn" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body rules-modal-body">
+        <div class="rules-section-title">Static Quality & Syntax Rules</div>
+        
+        <div class="rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Enforce Semicolons</div>
+            <div class="rule-desc">Flag missing statement-terminating semicolons in C/C++, Java, and JavaScript.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ruleSemicolons" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Strict Types & Expression Safety</div>
+            <div class="rule-desc">Detect string-to-numeric type mismatches and accidental assignment in conditions.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ruleStrictTypes" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Security & Secret Vulnerability Scanner</div>
+            <div class="rule-desc">Scan for hardcoded API keys, JWT secrets, SQL injection, and unclosed resources.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ruleSecurityScanner" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Duplicate Statements Detection</div>
+            <div class="rule-desc">Scan for redundant duplicate lines and repeated logic blocks across the file.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ruleDuplicateDetection" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Naming Conventions (camelCase / snake_case)</div>
+            <div class="rule-desc">Enforce idiomatic casing for variables and functions per language standard.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="ruleNamingConventions" checked>
+            <span class="slider round"></span>
+          </label>
+        </div>
+
+        <div class="rules-section-title" style="margin-top: 20px;">Complexity Threshold</div>
+
+        <div class="rule-row complexity-rule-row">
+          <div class="rule-info">
+            <div class="rule-title">Maximum Cyclomatic Complexity</div>
+            <div class="rule-desc">Raise a warning when branching paths (if/loops/switches) exceed this limit.</div>
+          </div>
+          <div class="complexity-input-group">
+            <input type="range" id="ruleMaxComplexitySlider" min="2" max="25" value="10" class="complexity-slider">
+            <span class="complexity-value" id="ruleMaxComplexityVal">10</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="resetRulesBtn" class="modal-btn secondary">Reset Defaults</button>
+        <div class="modal-footer-actions">
+          <button id="saveRulesBtn" class="modal-btn primary">Save & Re-Analyze</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MODAL 3: GITHUB README BADGE GENERATOR
+       ========================================================= -->
+  <div id="badgeModal" class="studio-modal-backdrop" style="display: none;">
+    <div class="studio-modal badge-modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <span class="modal-icon">🏷️</span>
+          <div>
+            <h3 class="modal-title">GitHub README Markdown Badges</h3>
+            <span class="modal-subtitle">Live Shields.io badges based on your latest evaluated code quality</span>
+          </div>
+        </div>
+        <button id="closeBadgeModalBtn" class="modal-close-btn" title="Close (Esc)">✕</button>
+      </div>
+
+      <div class="modal-body badge-modal-body">
+        <!-- Live Preview Strip -->
+        <div class="badge-preview-card">
+          <div class="badge-preview-title">Live Preview (as rendered in GitHub README)</div>
+          <div class="badge-row-preview" id="badgeRowPreview">
+            <!-- Badges dynamically rendered here -->
+          </div>
+        </div>
+
+        <!-- Individual Badges -->
+        <div class="badge-grid">
+          <div class="badge-item-card">
+            <div class="badge-item-top">
+              <span class="badge-item-label">Code Quality Score</span>
+              <button class="copy-badge-btn" data-target="badgeMarkdownScore">Copy</button>
+            </div>
+            <div class="badge-live-img" id="liveBadgeScore"></div>
+            <input type="text" class="badge-input" id="badgeMarkdownScore" readonly>
+          </div>
+
+          <div class="badge-item-card">
+            <div class="badge-item-top">
+              <span class="badge-item-label">Quality Letter Grade</span>
+              <button class="copy-badge-btn" data-target="badgeMarkdownGrade">Copy</button>
+            </div>
+            <div class="badge-live-img" id="liveBadgeGrade"></div>
+            <input type="text" class="badge-input" id="badgeMarkdownGrade" readonly>
+          </div>
+
+          <div class="badge-item-card">
+            <div class="badge-item-top">
+              <span class="badge-item-label">Security Status</span>
+              <button class="copy-badge-btn" data-target="badgeMarkdownSecurity">Copy</button>
+            </div>
+            <div class="badge-live-img" id="liveBadgeSecurity"></div>
+            <input type="text" class="badge-input" id="badgeMarkdownSecurity" readonly>
+          </div>
+
+          <div class="badge-item-card">
+            <div class="badge-item-top">
+              <span class="badge-item-label">Technical Debt</span>
+              <button class="copy-badge-btn" data-target="badgeMarkdownDebt">Copy</button>
+            </div>
+            <div class="badge-live-img" id="liveBadgeDebt"></div>
+            <input type="text" class="badge-input" id="badgeMarkdownDebt" readonly>
+          </div>
+        </div>
+
+        <!-- Combined All-In-One Snippet -->
+        <div class="combined-snippet-box">
+          <div class="combined-header">
+            <span>Complete Markdown Suite (All 4 Badges)</span>
+            <button id="copyAllBadgesBtn" class="modal-btn primary btn-sm">📋 Copy All Markdown</button>
+          </div>
+          <textarea id="allBadgesSnippet" class="badge-textarea" readonly rows="3"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <span class="badge-modal-tip">💡 Paste directly into your project's <code>README.md</code> at repo root.</span>
+        <button id="doneBadgeBtn" class="modal-btn secondary">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="appToast" class="app-toast"></div>
 
   <!-- Scripts -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
@@ -156,20 +547,30 @@
   <script>
     (function () {
       var token = localStorage.getItem('cqe-token');
-      if (!token) return;
       var box = document.getElementById('authLinks');
-      box.innerHTML =
-        '<a class="auth-link" href="history.html">History</a> ' +
-        '<a class="auth-link" href="#" id="logoutLink">Logout</a>';
-      document.getElementById('logoutLink').addEventListener('click', function (e) {
-        e.preventDefault();
-        localStorage.removeItem('cqe-token');
-        location.reload();
-      });
+      if (!box) return;
+      if (token) {
+        box.innerHTML =
+          '<a class="auth-link" href="history.html">History</a> ' +
+          '<a class="auth-link" href="#" id="logoutLink">Logout</a>';
+        var logout = document.getElementById('logoutLink');
+        if (logout) {
+          logout.addEventListener('click', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('cqe-token');
+            localStorage.removeItem('cqe-userId');
+            location.reload();
+          });
+        }
+      } else {
+        box.innerHTML =
+          '<a class="auth-link" href="history.html">History</a> ' +
+          '<a class="auth-link" href="login.html">Log in / Sign up</a>';
+      }
     })();
   </script>
 
-  <script src="js/app.js"></script>
+  <script src="js/app.js?v=3.0"></script>
 
 </body>
 </html>

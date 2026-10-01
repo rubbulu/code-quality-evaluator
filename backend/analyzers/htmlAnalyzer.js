@@ -10,13 +10,23 @@ function analyzeHTML(code) {
     errors.push({
       line: getLineNumber(code, match.index),
       type: "warning",
-      message: "Image missing alt attribute (bad for accessibility)"
+      category: "accessibility",
+      message: "Image missing alt attribute (bad for accessibility)",
+      explanation: "Add an alt attribute describing the image content to support screen readers and enhance accessibility.",
+      fixType: "html_add_alt"
     });
   }
 
   // Missing DOCTYPE
   if (!/<!DOCTYPE\s+html>/i.test(code)) {
-    errors.push({ line: 1, type: "warning", message: "Missing <!DOCTYPE html> declaration" });
+    errors.push({
+      line: 1,
+      type: "warning",
+      category: "standards",
+      message: "Missing <!DOCTYPE html> declaration",
+      explanation: "A <!DOCTYPE html> declaration ensures web browsers render pages in standards-compliant HTML5 mode.",
+      fixType: "html_add_doctype"
+    });
   }
 
   // Inline styles
@@ -24,7 +34,10 @@ function analyzeHTML(code) {
     errors.push({
       line: getLineNumber(code, match.index),
       type: "warning",
-      message: "Inline style found — prefer external CSS classes"
+      category: "style",
+      message: "Inline style found — prefer external CSS classes",
+      explanation: "Inline CSS reduces maintainability and increases specificity wars. Extract inline styles into CSS classes.",
+      fixType: "html_remove_inline_style"
     });
   }
 
@@ -37,7 +50,10 @@ function analyzeHTML(code) {
       errors.push({
         line: getLineNumber(code, m.index),
         type: "error",
-        message: `Duplicate id "${id}" used more than once`
+        category: "syntax",
+        message: `Duplicate id "${id}" used more than once`,
+        explanation: `HTML element IDs must be unique across the document. Rename duplicate ID "${id}" or use a class.`,
+        fixType: "html_rename_duplicate_id"
       });
     }
     seenIds.set(id, true);
@@ -53,7 +69,10 @@ function analyzeHTML(code) {
       errors.push({
         line,
         type: "error",
-        message: `Mismatched <${tag}> tags: ${openMatches.length} opened, ${closeMatches.length} closed`
+        category: "syntax",
+        message: `Mismatched <${tag}> tags: ${openMatches.length} opened, ${closeMatches.length} closed`,
+        explanation: `Ensure every opened <${tag}> tag has an exact corresponding closing </${tag}> tag.`,
+        fixType: "html_close_tag"
       });
     }
   });
@@ -64,7 +83,10 @@ function analyzeHTML(code) {
     errors.push({
       line: getLineNumber(code, htmlTagMatch.index),
       type: "warning",
-      message: "Missing lang attribute on <html> tag"
+      category: "accessibility",
+      message: "Missing lang attribute on <html> tag",
+      explanation: "Declare document language with lang=\"en\" on <html> to assist screen readers and search engines.",
+      fixType: "html_add_lang"
     });
   }
 

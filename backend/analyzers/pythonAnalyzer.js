@@ -68,7 +68,11 @@ function analyzePython(code) {
     while ((printMatch = oldPrintRegex.exec(cleaned)) !== null) {
         errors.push({
             line: lineNumberAt(cleaned, printMatch.index),
-            message: "Use print() function in Python 3."
+            type: "warning",
+            category: "syntax",
+            message: "Use print() function in Python 3.",
+            explanation: "In Python 3, print is a built-in function requiring parentheses: print(...).",
+            fixType: "python_print_parens"
         });
     }
 
@@ -79,9 +83,14 @@ function analyzePython(code) {
         const name = match[1];
         const isConstant = name === name.toUpperCase();
         if (!isConstant) {
+            const suggested = name.replace(/([a-z0-9])([A-Z])/g, '$1_$2').toLowerCase();
             errors.push({
                 line: lineNumberAt(cleaned, match.index),
-                message: `Variable '${name}' should use lowercase naming.`
+                type: "warning",
+                category: "naming",
+                message: `Variable '${name}' should use lowercase snake_case naming.`,
+                explanation: `Python PEP 8 style guide recommends lowercase words separated by underscores (e.g. '${suggested}') for variable names.`,
+                fixType: "snake_case"
             });
         }
     }
@@ -93,7 +102,10 @@ function analyzePython(code) {
         if (line.length > 100) {
             errors.push({
                 line: index + 1,
-                message: "Line is longer than 100 characters."
+                type: "warning",
+                category: "style",
+                message: "Line is longer than 100 characters.",
+                explanation: "Long lines reduce readability in code reviews. Split statements across multiple lines."
             });
         }
     });
@@ -103,7 +115,11 @@ function analyzePython(code) {
         if (/^\s*\t/.test(line) || line.startsWith("\t")) {
             errors.push({
                 line: index + 1,
-                message: "Use spaces instead of tabs for indentation."
+                type: "warning",
+                category: "style",
+                message: "Use spaces instead of tabs for indentation.",
+                explanation: "PEP 8 recommends 4 spaces per indentation level rather than tabs.",
+                fixType: "replace_tabs"
             });
         }
     });

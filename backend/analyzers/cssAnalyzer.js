@@ -2,62 +2,91 @@ function getLineNumber(code, index) {
   return code.slice(0, index).split('\n').length;
 }
 
+function stripCSSComments(code) {
+  return (code || "").replace(/\/\*[\s\S]*?\*\//g, m => ' '.repeat(m.length));
+}
+
 function analyzeCSS(code) {
   const errors = [];
+  const cleaned = stripCSSComments(code);
 
   // !important
-  for (const match of code.matchAll(/!important/gi)) {
+  for (const match of cleaned.matchAll(/!important/gi)) {
     errors.push({
       line: getLineNumber(code, match.index),
       type: "warning",
-      message: "Use of !important — avoid when possible, indicates specificity issues"
+      category: "style",
+      message: "Use of !important — avoid when possible, indicates specificity issues",
+      explanation: "Avoid !important to maintain natural CSS cascade and prevent difficult-to-override rules.",
+      fixType: "css_remove_important"
     });
   }
 
   // Empty rule blocks
-  for (const match of code.matchAll(/([^{}]+)\{\s*\}/g)) {
-    const selector = match[1].trim();
+  for (const match of cleaned.matchAll(/([^{};]+)\{\s*\}/g)) {
+    const rawSel = match[1];
+    const selector = rawSel.trim();
+    if (!selector || /\b(public|private|protected|static|void|class|interface|def|function)\b/.test(selector) || selector.includes("(")) continue;
+    const leadingWsLen = rawSel.length - rawSel.trimStart().length;
+    const selIndex = match.index + match[0].indexOf(rawSel) + leadingWsLen;
     errors.push({
-      line: getLineNumber(code, match.index),
+      line: getLineNumber(code, selIndex),
       type: "warning",
-      message: `Empty rule block for "${selector}"`
+      category: "style",
+      message: `Empty rule block for "${selector}"`,
+      explanation: `Empty rule blocks add dead weight to stylesheets. Remove "${selector}" or populate its declarations.`,
+      fixType: "css_remove_empty_rule"
     });
   }
 
-  // Duplicate selectors
-  const selectorMatches = [...code.matchAll(/([^{}]+)\{/g)];
+  // Duplicate and Overly specific selectors
+  const selectorMatches = [...cleaned.matchAll(/(?:^|[;{}])\s*([^;{}]+)\{/g)];
   const seen = new Map();
+  const nonSelectorKeywords = /\b(public|private|protected|static|void|package|import|interface|abstract|def|function|return|switch|while|for|if|else|try|catch|finally|throw|new|const|let|var|int|float|double|boolean|char|String|class)\b/;
+
   selectorMatches.forEach(m => {
-    const sel = m[1].trim();
+    const rawSel = m[1];
+    const sel = rawSel.trim();
+    if (!sel || nonSelectorKeywords.test(sel) || sel.includes("(")) return;
+
+    const leadingWsLen = rawSel.length - rawSel.trimStart().length;
+    const selIndex = m.index + m[0].indexOf(rawSel) + leadingWsLen;
+    const selLine = getLineNumber(code, selIndex);
+
     if (seen.has(sel)) {
       errors.push({
-        line: getLineNumber(code, m.index),
+        line: selLine,
         type: "warning",
-        message: `Duplicate selector "${sel}" defined more than once`
+        category: "duplication",
+        message: `Duplicate selector "${sel}" defined more than once`,
+        explanation: "Consolidate duplicate selector declarations into a single CSS rule block to avoid redundancy.",
+        fixType: "css_comment_duplicate"
       });
     }
     seen.set(sel, true);
-  });
 
-  // Overly specific selectors
-  selectorMatches.forEach(m => {
-    const sel = m[1].trim();
     const parts = sel.split(/\s+/).filter(Boolean);
     if (parts.length > 3) {
       errors.push({
-        line: getLineNumber(code, m.index),
+        line: selLine,
         type: "warning",
-        message: `Overly specific selector "${sel}" — consider simplifying`
+        category: "style",
+        message: `Overly specific selector "${sel}" — consider simplifying`,
+        explanation: "Deeply nested selectors increase specificity and make styles difficult to override. Simplify selector.",
+        fixType: "css_simplify_selector"
       });
     }
   });
 
   // Missing semicolons before closing brace
-  for (const match of code.matchAll(/[a-zA-Z0-9%)\]"']\s*\n\s*\}/g)) {
+  for (const match of cleaned.matchAll(/[a-zA-Z0-9%)\]"']\s*\n\s*\}/g)) {
     errors.push({
       line: getLineNumber(code, match.index),
       type: "error",
-      message: "Possible missing semicolon before closing brace"
+      category: "syntax",
+      message: "Possible missing semicolon before closing brace",
+      explanation: "CSS declarations must terminate with a semicolon ';' before the closing brace.",
+      fixType: "add_semicolon"
     });
   }
 

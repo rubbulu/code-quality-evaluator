@@ -24,8 +24,12 @@
       <h1 style="font-size: 32px;">Analysis History</h1>
     </header>
 
-    <div class="pane" style="max-width: 700px; margin: 0 auto;">
-      <div class="report-label">Past Reports</div>
+    <div class="pane" style="max-width: 800px; margin: 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <div class="report-label" id="historySourceLabel">Past Reports</div>
+        <div id="historyActions" style="display: flex; gap: 8px;"></div>
+      </div>
+      <div id="historyNotification"></div>
       <div id="historyList" class="issues-list" style="max-height: none;">
         <div class="issue-empty">Loading…</div>
       </div>
